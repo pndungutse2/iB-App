@@ -8,6 +8,7 @@ import productRoutes from './routes/products';
 import shoppingListRoutes from './routes/shoppingLists';
 import authRoutes from './routes/auth';
 import analyticsRoutes from './routes/analytics';
+import productIdentificationRoutes from './routes/productIdentification';
 import authMiddleware from './middlewares/auth';
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', authMiddleware, productRoutes);
 app.use('/api/shopping-lists', authMiddleware, shoppingListRoutes);
 app.use('/api/analytics', authMiddleware, analyticsRoutes);
+app.use('/api/product-identification', authMiddleware, productIdentificationRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
