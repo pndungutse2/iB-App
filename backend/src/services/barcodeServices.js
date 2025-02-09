@@ -1,17 +1,18 @@
-const axios = require('axios');
+import { get } from 'axios';
 
-const UPC_API_URL = 'https://api.upcitemdb.com/prod/trial/lookup';  // Replace with actual API if needed
-const UPC_API_KEY = process.env.UPC_API_KEY;  // Store API key securely
+const UPC_API_URL = 'https://api.upcitemdb.com/prod/trial/lookup'; // Replace with actual API if needed
+const UPC_API_KEY = process.env.UPC_API_KEY; // Store API key securely
 
 async function fetchProductByBarcode(barcode) {
     try {
-        const response = await axios.get(UPC_API_URL, {
+        const response = await get(UPC_API_URL, {
             params: { upc: barcode },
             headers: { 'Authorization': `Bearer ${UPC_API_KEY}` }
         });
 
-        if (response.data.items && response.data.items.length > 0) {
-            const item = response.data.items[0];
+        const items = response.data.items;
+        if (items && items.length > 0) {
+            const item = items[0];
             return {
                 name: item.title,
                 category: item.category || 'Others',
@@ -26,4 +27,4 @@ async function fetchProductByBarcode(barcode) {
     }
 }
 
-module.exports = { fetchProductByBarcode };
+export default { fetchProductByBarcode };

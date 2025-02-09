@@ -1,18 +1,33 @@
 require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const productRoutes = require('./routes/products');
-const shoppingListRoutes = require('./routes/shoppingLists');
+import express, { json } from 'express';
+import { connect } from 'mongoose';
+import helmet from 'helmet';
+import compression from 'compression';
+import cors from 'cors';
+import productRoutes from './routes/products';
+import shoppingListRoutes from './routes/shoppingLists';
+import authRoutes from './routes/auth';
+import analyticsRoutes from './routes/analytics';
+import authMiddleware from './middlewares/auth';
 
 const app = express();
-app.use(express.json());
+app.use(json());
+app.use(helmet());
+app.use(compression());
+app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Failed to connect to MongoDB:', err));
+(async () => {
+    try {
+        await connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('Connected to MongoDB');
+    } catch (err) {
+        console.error('Failed to connect to MongoDB:', err);
+    }
+})();
 
 // Public routes
 app.use('/api/auth', authRoutes);

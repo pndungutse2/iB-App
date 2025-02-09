@@ -1,102 +1,17 @@
 const express = require('express');
-const Product = require('../models/Product');
-const ShoppingList = require('../models/ShoppingList');
 const nodemailer = require('nodemailer');
-const Product = require('../models/Product');
+const Product = require('../models/Product').default;
+
 const router = express.Router();
 
-
-// Total spending per category
-router.get('/spending-per-category', async (req, res) => {
-    try {
-        const data = await Product.aggregate([
-            { $group: { _id: '$category', totalSpent: { $sum: '$price' } } }
-        ]);
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch analytics' });
-    }
-});
-
-// Spending per store
-router.get('/spending-per-store', async (req, res) => {
-    try {
-        const data = await ShoppingList.aggregate([
-            {
-                $group: {
-                    _id: '$store',
-                    totalSpent: { $sum: '$totalSpent' },
-                    itemCount: { $sum: { $size: '$products' } }
-                }
-            }
-        ]);
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch store spending' });
-    }
-});
-
-// Spending trends over time
-router.get('/spending-trends', async (req, res) => {
-    try {
-        const data = await Product.aggregate([
-            {
-                $group: {
-                    _id: { $month: '$datePurchased' },
-                    totalSpent: { $sum: '$price' },
-                    productCount: { $sum: 1 }
-                }
-            },
-            { $sort: { '_id': 1 } }
-        ]);
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch spending trends' });
-    }
-});
-
-// Spending trends with detailed breakdown by month and year
-router.get('/spending-trends-detail', async (req, res) => {
-    try {
-        const data = await Product.aggregate([
-            {
-                $group: {
-                    _id: { month: { $month: '$datePurchased' }, year: { $year: '$datePurchased' } },
-                    totalSpent: { $sum: '$price' },
-                    productCount: { $sum: 1 }
-                }
-            },
-            { $sort: { '_id.year': 1, '_id.month': 1 } }
-        ]);
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch detailed spending trends' });
-    }
-});
-
-// Spending per store with breakdown by category
-router.get('/spending-store-category', async (req, res) => {
-    try {
-        const data = await Product.aggregate([
-            {
-                $group: {
-                    _id: { store: '$store', category: '$category' },
-                    totalSpent: { $sum: '$price' }
-                }
-            }
-        ]);
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch spending by store and category' });
-    }
-});
-
-// Configure nodemailer
+// Configure nodemailer to use Amazon SES SMTP
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.SES_SMTP_HOST,
+    port: process.env.SES_SMTP_PORT,
+    secure: false, // true for 465, false for other ports
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.SES_ACCESS_KEY_ID,
+        pass: process.env.SES_SECRET_ACCESS_KEY
     }
 });
 
@@ -140,4 +55,3 @@ router.post('/send-monthly-report', async (req, res) => {
 });
 
 module.exports = router;
-

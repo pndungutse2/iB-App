@@ -1,12 +1,14 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const productSchema = new mongoose.Schema({
-    name: String,
-    category: { type: String, enum: ['Grocery', 'Electronics', 'Clothing', 'Others'] },
-    barcode: { type: String, unique: true },
-    price: Number,
-    store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
+const productSchema = new Schema({
+    name: { type: String, required: true },
+    category: { type: String, enum: ['Grocery', 'Electronics', 'Clothing', 'Others'], required: true },
+    barcode: { type: String, unique: true, required: true },
+    price: { type: Number, required: true },
+    store: { type: Schema.Types.ObjectId, ref: 'Store', required: true },
     datePurchased: { type: Date, default: Date.now }
+}, {
+    timestamps: true // Automatically manage createdAt and updatedAt fields
 });
 
-module.exports = mongoose.model('Product', productSchema);
+export default model('Product', productSchema);

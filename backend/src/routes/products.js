@@ -1,7 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const Product = require('../models/Product');
-const { fetchProductByBarcode } = require('../services/barcodeService');
+import { Router } from 'express';
+const router = Router();
+import Product, { find, countDocuments } from '../models/Product';
+import { fetchProductByBarcode } from '../services/barcodeServices';
 
 // Add a new product by scanning a barcode
 router.post('/scan', async (req, res) => {
@@ -25,13 +25,14 @@ router.post('/scan', async (req, res) => {
     }
 });
 
+// Get paginated products
 router.get('/', async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
-        const products = await Product.find()
+        const products = await find()
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
-        const totalProducts = await Product.countDocuments();
+        const totalProducts = await countDocuments();
 
         res.status(200).json({
             data: products,
@@ -43,4 +44,4 @@ router.get('/', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
